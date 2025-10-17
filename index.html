@@ -53,22 +53,22 @@
 <body>
   <div class="container">
     <h1>AI Songs Radio</h1>
-    <button id="startBtn">START!</button>
+    <button id="startBtn">START RADIO</button>
     <div id="status">Wacht op activatie…</div>
   </div>
 
   <script>
     let audio = null;
-    let preloadedHour = null;
     let radioActief = false;
+    let laatstGespeeld = "";
 
-    const files = {
-      7: "7 uur.mp3",
-      8: "8 uur.mp3",
-      9: "9 uur.mp3",
-      10: "10 uur.mp3",
-      12: "12 uur.mp3"
-    };
+    // ✅ Voeg hier je tijden toe in HH:MM formaat
+    const beschikbareTijden = [
+      "07:00",
+      "09:00",
+      "10:00",
+      "12:00"
+    ];
 
     document.getElementById('startBtn').onclick = () => {
       radioActief = true;
@@ -81,29 +81,27 @@
       if (!radioActief) return;
 
       const now = new Date();
-      const hour = now.getHours();
-      const minute = now.getMinutes();
-      const second = now.getSeconds();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      const tijdNu = `${hh}:${mm}`;
 
-      const nextHour = (hour + 1) % 24;
+      if (beschikbareTijden.includes(tijdNu) && laatstGespeeld !== tijdNu && ss === "00") {
+        const bestand = `${tijdNu}.mp3`;
 
-      // Voorladen 30 seconden voor het uur
-      if (minute === 59 && second >= 30 && files[nextHour] && preloadedHour !== nextHour) {
-        audio = new Audio(files[nextHour]);
-        audio.preload = "auto";
-        preloadedHour = nextHour;
-        document.getElementById('status').textContent = `Voorladen: ${files[nextHour]}`;
-      }
+        // Stop vorige audio als die speelt
+        if (audio && !audio.paused) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
 
-      // Afspelen op het hele uur
-      if (minute === 0 && second === 0 && files[hour] && preloadedHour === hour && audio) {
+        audio = new Audio(bestand);
         audio.play().then(() => {
-          document.getElementById('status').textContent = `Speelt nu: ${files[hour]}`;
+          document.getElementById('status').textContent = `Speelt nu: ${bestand}`;
+          laatstGespeeld = tijdNu;
         }).catch(err => {
-          document.getElementById('status').textContent = `Kan niet automatisch afspelen: ${err.message}`;
+          document.getElementById('status').textContent = `Kan niet afspelen: ${err.message}`;
         });
-        preloadedHour = null;
-        audio = null;
       }
     }
   </script>
