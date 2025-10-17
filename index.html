@@ -70,9 +70,9 @@
     };
 
     document.getElementById('startBtn').onclick = () => {
-      document.getElementById('status').textContent = "Radio gestart. Luister ze!";
+      document.getElementById('status').textContent = "Verbonden met radio.";
       checkTime();
-      setInterval(checkTime, 1000);
+      setInterval(checkTime, 100);
     };
 
     function checkTime() {
@@ -96,7 +96,7 @@
           document.getElementById('status').textContent = `Speelt nu: ${files[hour]}`;
         }
       } else {
-        document.getElementById('status').textContent = "Geen bestand gepland voor dit uur.";
+        document.getElementById('status').textContent = "Geen signalen gevonden.";
         preloaded = false;
         audio = null;
       }
