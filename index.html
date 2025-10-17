@@ -64,6 +64,7 @@
 
     // ✅ Voeg hier je tijden toe in HH.MM formaat
     const beschikbareTijden = [
+      "06.00",
       "07.00",
       "09.00",
       "10.00",
@@ -72,7 +73,7 @@
 
     document.getElementById('startBtn').onclick = () => {
       radioActief = true;
-      document.getElementById('status').textContent = "Radio actief. Wacht op volgend tijdstip…";
+      document.getElementById('status').textContent = "Radio niet gevonden. Wacht op signaal...";
       checkTime();
       setInterval(checkTime, 1000);
     };
@@ -97,10 +98,10 @@
 
         audio = new Audio(bestand);
         audio.play().then(() => {
-          document.getElementById('status').textContent = `Speelt nu: ${bestand}`;
+          document.getElementById('status').textContent = `Radio speelt nu.`;
           laatstGespeeld = tijdNu;
         }).catch(err => {
-          document.getElementById('status').textContent = `Kan niet afspelen: ${err.message}`;
+          document.getElementById('status').textContent = `Geen signaal gevonden. Probeer later opnieuw.`;
         });
       }
     }
