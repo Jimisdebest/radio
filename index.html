@@ -29,6 +29,20 @@
       margin-bottom: 30px;
       font-size: 2rem;
     }
+    button {
+      padding: 14px 28px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background: white;
+      color: #2980B9;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background: #f1f1f1;
+    }
     #status {
       margin-top: 20px;
       font-size: 1rem;
@@ -39,12 +53,14 @@
 <body>
   <div class="container">
     <h1>AI Songs Radio</h1>
+    <button id="startBtn">START!</button>
     <div id="status">Wacht op activatie…</div>
   </div>
 
   <script>
     let audio = null;
     let preloadedHour = null;
+    let radioActief = false;
 
     const files = {
       7: "7 uur.mp3",
@@ -54,7 +70,16 @@
       12: "12 uur.mp3"
     };
 
+    document.getElementById('startBtn').onclick = () => {
+      radioActief = true;
+      document.getElementById('status').textContent = "Radio actief. Wacht op volgend tijdstip…";
+      checkTime();
+      setInterval(checkTime, 1000);
+    };
+
     function checkTime() {
+      if (!radioActief) return;
+
       const now = new Date();
       const hour = now.getHours();
       const minute = now.getMinutes();
@@ -62,7 +87,7 @@
 
       const nextHour = (hour + 1) % 24;
 
-      // Preload 30 seconden voor het volgende uur
+      // Voorladen 30 seconden voor het uur
       if (minute === 59 && second >= 30 && files[nextHour] && preloadedHour !== nextHour) {
         audio = new Audio(files[nextHour]);
         audio.preload = "auto";
@@ -70,7 +95,7 @@
         document.getElementById('status').textContent = `Voorladen: ${files[nextHour]}`;
       }
 
-      // Speel af precies op het uur
+      // Afspelen op het hele uur
       if (minute === 0 && second === 0 && files[hour] && preloadedHour === hour && audio) {
         audio.play().then(() => {
           document.getElementById('status').textContent = `Speelt nu: ${files[hour]}`;
@@ -81,13 +106,6 @@
         audio = null;
       }
     }
-
-    // Start automatisch bij laden van de pagina
-    window.onload = () => {
-      document.getElementById('status').textContent = "Radio actief. Wacht op volgend tijdstip…";
-      checkTime();
-      setInterval(checkTime, 1000);
-    };
   </script>
 </body>
 </html>
