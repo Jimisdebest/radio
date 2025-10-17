@@ -62,12 +62,11 @@
     let radioActief = false;
     let laatstGespeeld = "";
 
-    // ✅ Voeg hier je tijden toe in HH:MM formaat
+    // ✅ Voeg hier je tijden toe in HH.MM formaat
     const beschikbareTijden = [
-      "07:00",
-      "09:00",
-      "10:00",
-      "12:00"
+      "07.00",
+      "10.00",
+      "12.00"
     ];
 
     document.getElementById('startBtn').onclick = () => {
@@ -84,7 +83,7 @@
       const hh = String(now.getHours()).padStart(2, '0');
       const mm = String(now.getMinutes()).padStart(2, '0');
       const ss = String(now.getSeconds()).padStart(2, '0');
-      const tijdNu = `${hh}:${mm}`;
+      const tijdNu = `${hh}.${mm}`;
 
       if (beschikbareTijden.includes(tijdNu) && laatstGespeeld !== tijdNu && ss === "00") {
         const bestand = `${tijdNu}.mp3`;
