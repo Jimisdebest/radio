@@ -29,20 +29,6 @@
       margin-bottom: 30px;
       font-size: 2rem;
     }
-    button {
-      padding: 14px 28px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      background: white;
-      color: #2980B9;
-      cursor: pointer;
-      width: 100%;
-    }
-    button:hover {
-      background: #f1f1f1;
-    }
     #status {
       margin-top: 20px;
       font-size: 1rem;
@@ -53,13 +39,12 @@
 <body>
   <div class="container">
     <h1>AI Songs Radio</h1>
-    <button id="startBtn">START!</button>
     <div id="status">Wacht op activatie…</div>
   </div>
 
   <script>
     let audio = null;
-    let preloaded = false;
+    let preloadedHour = null;
 
     const files = {
       7: "7 uur.mp3",
@@ -67,13 +52,6 @@
       9: "9 uur.mp3",
       10: "10 uur.mp3",
       12: "12 uur.mp3"
-      
-    };
-
-    document.getElementById('startBtn').onclick = () => {
-      document.getElementById('status').textContent = "Verbonden met radio.";
-      checkTime();
-      setInterval(checkTime, 100);
     };
 
     function checkTime() {
@@ -82,26 +60,34 @@
       const minute = now.getMinutes();
       const second = now.getSeconds();
 
-      if (files[hour]) {
-        // Preload 30 sec voor het uur
-        if (minute === 59 && second >= 30 && !preloaded) {
-          audio = new Audio(files[hour]);
-          audio.preload = "auto";
-          preloaded = true;
-          document.getElementById('status').textContent = `Voorladen: ${files[hour]}`;
-        }
+      const nextHour = (hour + 1) % 24;
 
-        // Speel af precies op het uur
-        if (minute === 0 && second === 0 && audio) {
-          audio.play();
+      // Preload 30 seconden voor het volgende uur
+      if (minute === 59 && second >= 30 && files[nextHour] && preloadedHour !== nextHour) {
+        audio = new Audio(files[nextHour]);
+        audio.preload = "auto";
+        preloadedHour = nextHour;
+        document.getElementById('status').textContent = `Voorladen: ${files[nextHour]}`;
+      }
+
+      // Speel af precies op het uur
+      if (minute === 0 && second === 0 && files[hour] && preloadedHour === hour && audio) {
+        audio.play().then(() => {
           document.getElementById('status').textContent = `Speelt nu: ${files[hour]}`;
-        }
-      } else {
-        document.getElementById('status').textContent = "Geen signalen gevonden.";
-        preloaded = false;
+        }).catch(err => {
+          document.getElementById('status').textContent = `Kan niet automatisch afspelen: ${err.message}`;
+        });
+        preloadedHour = null;
         audio = null;
       }
     }
+
+    // Start automatisch bij laden van de pagina
+    window.onload = () => {
+      document.getElementById('status').textContent = "Radio actief. Wacht op volgend tijdstip…";
+      checkTime();
+      setInterval(checkTime, 1000);
+    };
   </script>
 </body>
 </html>
