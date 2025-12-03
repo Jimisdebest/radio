@@ -1,110 +1,865 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Songs Radio</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #6DD5FA, #2980B9);
-      color: white;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .container {
-      background: rgba(255,255,255,0.1);
-      padding: 40px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.25);
-      text-align: center;
-    }
-    h1 {
-      margin-bottom: 30px;
-      font-size: 2rem;
-    }
-    button {
-      padding: 14px 28px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      background: white;
-      color: #2980B9;
-      cursor: pointer;
-      width: 100%;
-    }
-    button:hover {
-      background: #f1f1f1;
-    }
-    #status {
-      margin-top: 20px;
-      font-size: 1rem;
-      opacity: 0.9;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Songs Radio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #4fc3f7;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .current-time {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+        
+        .status-message {
+            font-size: 1.4rem;
+            margin: 20px 0;
+            min-height: 40px;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .status-connecting {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+        
+        .status-found {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+        
+        .status-notfound {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+        
+        .status-connected {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .countdown {
+            font-size: 1.2rem;
+            color: #bbbbbb;
+            margin: 10px 0;
+            min-height: 24px;
+        }
+        
+        .start-button {
+            background-color: #4fc3f7;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .start-button:hover {
+            background-color: #29b6f6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .start-button:active {
+            transform: translateY(1px);
+        }
+        
+        .start-button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .volume-slider {
+            width: 200px;
+            height: 8px;
+            -webkit-appearance: none;
+            background: #333;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* Popup venster stijlen */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .popup-container {
+            background-color: rgba(10, 25, 47, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            border: 2px solid #4fc3f7;
+        }
+        
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .popup-title {
+            font-size: 1.5rem;
+            color: #4fc3f7;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .popup-time {
+            font-size: 2.5rem;
+            text-align: center;
+            margin: 20px 0;
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+        
+        .popup-status {
+            font-size: 1.3rem;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .popup-close-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .popup-close-btn {
+            background-color: #4fc3f7;
+            color: #000;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .warning {
+            color: #ff9800;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>AI Songs Radio</h1>
-    <button id="startBtn">Start Radio</button>
-    <div id="status">Wacht op activatie…</div>
-  </div>
+    <div class="container">
+        <div class="logo">📻</div>
+        <h1>AI Songs Radio</h1>
+        
+        <div class="current-time" id="currentTime">--:--</div>
+        
+        <div class="status-message" id="statusMessage">
+            Radio wordt geladen...
+        </div>
+        
+        <div class="countdown" id="countdown"></div>
+        
+        <div class="volume-control">
+            <span>🔈</span>
+            <input type="range" min="0" max="1" step="0.01" value="0.5" class="volume-slider" id="volumeSlider">
+            <span>🔊</span>
+        </div>
+        
+        <button class="start-button" id="startBtn">
+            Start Radio
+        </button>
+        
+        <footer>
+            <p>De radio speelt automatisch af op specifieke tijden</p>
+        </footer>
+    </div>
+    
+    <!-- Popup venster -->
+    <div class="popup-overlay hidden" id="popupOverlay">
+        <div class="popup-container">
+            <div class="popup-header">
+                <div class="popup-title">Radio Status</div>
+                <button class="close-btn" id="closePopupBtn">✕</button>
+            </div>
+            
+            <div class="popup-time" id="popupTime">--:--</div>
+            
+            <div class="popup-status" id="popupStatus">
+                Verbinding controleren...
+            </div>
+            
+            <div class="popup-close-container">
+                <button class="popup-close-btn" id="popupCloseBtn">Venster Sluiten</button>
+                <div class="warning">Sluit dit venster om terug te gaan naar de hoofdinterface</div>
+            </div>
+        </div>
+    </div>
 
-  <script>
-    let audio = null;
-    let radioActief = false;
-    let laatstGespeeld = "";
-
-    // ✅ Voeg hier je tijden toe in HH.MM formaat
-    const beschikbareTijden = [
-      "06.00",
-      "07.00",
-      "09.00",
-      "10.00",
-      "12.00"
-    ];
-
-    document.getElementById('startBtn').onclick = () => {
-      radioActief = true;
-      document.getElementById('status').textContent = "Radio niet gevonden. Wacht op signaal...";
-      checkTime();
-      setInterval(checkTime, 1000);
-    };
-
-    function checkTime() {
-      if (!radioActief) return;
-
-      const now = new Date();
-      const hh = String(now.getHours()).padStart(2, '0');
-      const mm = String(now.getMinutes()).padStart(2, '0');
-      const ss = String(now.getSeconds()).padStart(2, '0');
-      const tijdNu = `${hh}.${mm}`;
-
-      if (beschikbareTijden.includes(tijdNu) && laatstGespeeld !== tijdNu && ss === "00") {
-        const bestand = `${tijdNu}.mp3`;
-
-        // Stop vorige audio als die speelt
-        if (audio && !audio.paused) {
-          audio.pause();
-          audio.currentTime = 0;
+    <script>
+        // Afspeeltijden in HH.MM formaat
+        const beschikbareTijden = ["06.00", "07.00", "09.00", "10.00", "12.00"];
+        
+        // Audio bestanden voor elke tijdslot (gebruik gratis sample audio URLs)
+        const audioBestanden = {
+            "06.00": "06.00.mp3",
+            "07.00": "07.00.mp3",
+            "09.00": "09.00.mp3",
+            "10.00": "10.00.mp3",
+            "12.00": "12.00.mp3"
+        };
+        
+        // DOM elementen
+        const currentTimeElement = document.getElementById('currentTime');
+        const statusMessageElement = document.getElementById('statusMessage');
+        const countdownElement = document.getElementById('countdown');
+        const startBtn = document.getElementById('startBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const popupOverlay = document.getElementById('popupOverlay');
+        const popupTimeElement = document.getElementById('popupTime');
+        const popupStatusElement = document.getElementById('popupStatus');
+        const closePopupBtn = document.getElementById('closePopupBtn');
+        const popupCloseBtn = document.getElementById('popupCloseBtn');
+        
+        // Radio status variabelen
+        let audio = new Audio();
+        let currentTrack = null;
+        let isPlaying = false;
+        let timerInterval = null;
+        let nextPlayTime = null;
+        let preloadTimeout = null;
+        let playTimeout = null;
+        let popupBlocked = false;
+        let radioStarted = false;
+        
+        // Initialisatie functie
+        function init() {
+            updateCurrentTime();
+            updateNextPlayTime();
+            
+            // Start timer om de tijd elke seconde te updaten
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            // Audio event listeners
+            audio.addEventListener('play', () => {
+                isPlaying = true;
+                updateStatus();
+            });
+            
+            audio.addEventListener('pause', () => {
+                isPlaying = false;
+                updateStatus();
+            });
+            
+            audio.addEventListener('ended', () => {
+                isPlaying = false;
+                updateStatus();
+            });
+            
+            audio.addEventListener('loadeddata', () => {
+                console.log("Audio geladen voor afspelen");
+            });
+            
+            audio.addEventListener('error', (e) => {
+                console.error("Audio fout:", e);
+                updateStatusMessage("Radio niet gevonden", "notfound");
+            });
+            
+            // Controleer elke seconde of we moeten voorladen/afspelen
+            setInterval(checkPreloadAndPlay, 1000);
+            
+            // Knoppen event listeners
+            startBtn.addEventListener('click', startRadio);
+            volumeSlider.addEventListener('input', changeVolume);
+            closePopupBtn.addEventListener('click', closePopup);
+            popupCloseBtn.addEventListener('click', closePopup);
+            
+            // Probeer popup te openen om te zien of het geblokkeerd is
+            testPopupBlock();
+            
+            updateStatus();
         }
-
-        audio = new Audio(bestand);
-        audio.play().then(() => {
-          document.getElementById('status').textContent = `Radio speelt nu.`;
-          laatstGespeeld = tijdNu;
-        }).catch(err => {
-          document.getElementById('status').textContent = `Geen signaal gevonden. Probeer later opnieuw.`;
-        });
-      }
-    }
-  </script>
+        
+        // Test of popups geblokkeerd zijn
+        function testPopupBlock() {
+            const testPopup = window.open('', '_blank', 'width=100,height=100');
+            if (!testPopup || testPopup.closed) {
+                popupBlocked = true;
+                console.log("Popups zijn geblokkeerd, gebruik inline popup");
+            } else {
+                testPopup.close();
+            }
+        }
+        
+        // Update de huidige tijd display
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            currentTimeElement.textContent = `${hours}:${minutes}:${seconds}`;
+            
+            // Update ook popup tijd
+            if (popupTimeElement) {
+                popupTimeElement.textContent = `${hours}:${minutes}:${seconds}`;
+            }
+        }
+        
+        // Update de timer en controleer afspeeltijden
+        function updateTimer() {
+            updateCurrentTime();
+        }
+        
+        // Vind de volgende afspeeltijd
+        function findNextPlayTime() {
+            const now = new Date();
+            const currentHour = now.getHours().toString().padStart(2, '0');
+            const currentMinute = now.getMinutes().toString().padStart(2, '0');
+            const currentSecond = now.getSeconds();
+            const currentTimeStr = `${currentHour}.${currentMinute}`;
+            
+            // Vind de volgende afspeeltijd
+            for (let i = 0; i < beschikbareTijden.length; i++) {
+                const tijd = beschikbareTijden[i];
+                
+                if (compareTimes(tijd, currentTimeStr) > 0) {
+                    return { tijd, today: true };
+                }
+            }
+            
+            // Als er vandaag geen volgende tijd meer is, gebruik de eerste van morgen
+            return { tijd: beschikbareTijden[0], today: false };
+        }
+        
+        // Update de volgende afspeeltijd display
+        function updateNextPlayTime() {
+            const next = findNextPlayTime();
+            nextPlayTime = next.tijd;
+            
+            // Update countdown display
+            updateCountdown();
+        }
+        
+        // Vergelijk twee tijden in HH.MM formaat
+        function compareTimes(time1, time2) {
+            const [h1, m1] = time1.split('.').map(Number);
+            const [h2, m2] = time2.split('.').map(Number);
+            
+            if (h1 !== h2) return h1 - h2;
+            return m1 - m2;
+        }
+        
+        // Controleer of we moeten voorladen of afspelen
+        function checkPreloadAndPlay() {
+            const now = new Date();
+            const currentHour = now.getHours().toString().padStart(2, '0');
+            const currentMinute = now.getMinutes().toString().padStart(2, '0');
+            const currentSecond = now.getSeconds();
+            const currentTimeStr = `${currentHour}.${currentMinute}`;
+            
+            // Controleer of dit een beschikbare tijd is
+            if (beschikbareTijden.includes(currentTimeStr)) {
+                // Als we binnen 10 seconden zijn voor de tijd
+                if (currentSecond >= 50 && currentSecond < 60) {
+                    // 10 seconden voor de tijd - voorladen
+                    if (!audio.src || currentTrack !== currentTimeStr) {
+                        preloadAudio(currentTimeStr);
+                        updateStatusMessage("Radio gevonden. Signalen aanpassen en verbinden...", "found");
+                        
+                        // Als radio gestart is, update ook popup
+                        if (radioStarted) {
+                            updatePopupStatus("Radio gevonden. Signalen aanpassen en verbinden...", "found");
+                        }
+                    }
+                }
+                
+                // Exact op de tijd (op de halve seconde nauwkeurig)
+                if (currentSecond === 0) {
+                    // Wacht 500ms om precies op de halve seconde te spelen
+                    clearTimeout(playTimeout);
+                    playTimeout = setTimeout(() => {
+                        if (audio.src && !isPlaying) {
+                            playAudio();
+                            updateStatusMessage("Verbonden", "connected");
+                            
+                            // Als radio gestart is, update ook popup
+                            if (radioStarted) {
+                                updatePopupStatus("Verbonden", "connected");
+                            }
+                        }
+                    }, 500);
+                }
+            } else {
+                // Geen radio op dit tijdstip
+                if (isPlaying) {
+                    stopAudio();
+                }
+                
+                updateStatusMessage("Radio niet gevonden", "notfound");
+                
+                // Als radio gestart is, update ook popup
+                if (radioStarted) {
+                    updatePopupStatus("Radio niet gevonden", "notfound");
+                }
+            }
+            
+            updateCountdown();
+        }
+        
+        // Voorlaad audio 10 seconden voor de tijd
+        function preloadAudio(tijd) {
+            if (!audioBestanden[tijd]) {
+                console.error(`Geen radio gevonden voor nu ${tijd}`);
+                return;
+            }
+            
+            // Stop eventueel huidige audio
+            stopAudio();
+            
+            // Stel nieuwe audio in
+            audio.src = audioBestanden[tijd];
+            audio.volume = volumeSlider.value;
+            
+            // Preload de audio
+            audio.load();
+            currentTrack = tijd;
+            
+            console.log(`Audio voor ${tijd} voor geladen`);
+        }
+        
+        // Speel audio af
+        function playAudio() {
+            if (audio.src) {
+                audio.play().catch(error => {
+                    console.error("Audio afspelen mislukt:", error);
+                    updateStatusMessage("Fout bij afspelen", "notfound");
+                    
+                    if (radioStarted) {
+                        updatePopupStatus("Fout bij afspelen", "notfound");
+                    }
+                });
+            }
+        }
+        
+        // Stop audio
+        function stopAudio() {
+            audio.pause();
+            audio.currentTime = 0;
+            isPlaying = false;
+        }
+        
+        // Start de radio
+        function startRadio() {
+            radioStarted = true;
+            
+            // Probeer popup te openen als niet geblokkeerd
+            if (!popupBlocked) {
+                const popup = window.open('', 'RadioStatus', 'width=400,height=500,scrollbars=no,resizable=no');
+                if (popup && !popup.closed) {
+                    // Sluit de huidige pagina
+                    document.body.innerHTML = `
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; background: linear-gradient(135deg, #0c2461, #1e3799); color: white; text-align: center;">
+                            <h1>Radio gestart</h1>
+                            <p>De radio is gestart in een nieuw venster.</p>
+                            <p>Je kunt dit venster nu sluiten.</p>
+                        </div>
+                    `;
+                    
+                    // Schrijf popup inhoud
+                    popup.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Radio Status</title>
+                            <style>
+                                body {
+                                    margin: 0;
+                                    padding: 20px;
+                                    background: linear-gradient(135deg, #0c2461, #1e3799);
+                                    color: white;
+                                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                                }
+                                .container {
+                                    max-width: 400px;
+                                    margin: 0 auto;
+                                    text-align: center;
+                                }
+                                .logo {
+                                    font-size: 4rem;
+                                    margin: 20px 0;
+                                    color: #4fc3f7;
+                                }
+                                .popup-time {
+                                    font-size: 3rem;
+                                    font-weight: bold;
+                                    margin: 20px 0;
+                                    color: #4fc3f7;
+                                }
+                                .popup-status {
+                                    font-size: 1.5rem;
+                                    padding: 15px;
+                                    border-radius: 8px;
+                                    margin: 20px 0;
+                                    min-height: 60px;
+                                }
+                                .status-connecting { background-color: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107; }
+                                .status-found { background-color: rgba(76, 175, 80, 0.2); color: #4caf50; border: 1px solid #4caf50; }
+                                .status-notfound { background-color: rgba(244, 67, 54, 0.2); color: #f44336; border: 1px solid #f44336; }
+                                .status-connected { 
+                                    background-color: rgba(76, 175, 80, 0.2); 
+                                    color: #4caf50; 
+                                    border: 1px solid #4caf50; 
+                                    animation: pulse 2s infinite; 
+                                }
+                                @keyframes pulse {
+                                    0% { opacity: 1; }
+                                    50% { opacity: 0.7; }
+                                    100% { opacity: 1; }
+                                }
+                                .info {
+                                    margin-top: 30px;
+                                    color: #aaa;
+                                    font-size: 0.9rem;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <div class="logo">📻</div>
+                                <h1>Radio Status</h1>
+                                <div class="popup-time" id="popupTimeExtern">--:--</div>
+                                <div class="popup-status" id="popupStatusExtern">Verbonden</div>
+                                <div class="info">
+                                    <p>Luistert naar: <span id="currentHourExtern">--:--</span></p>
+                                    <p>Sluit dit venster om de radio te stoppen</p>
+                                </div>
+                            </div>
+                            <script>
+                                // Update tijd elke seconde
+                                function updateTime() {
+                                    const now = new Date();
+                                    const hours = now.getHours().toString().padStart(2, '0');
+                                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                                    const seconds = now.getSeconds().toString().padStart(2, '0');
+                                    document.getElementById('popupTimeExtern').textContent = hours + ':' + minutes + ':' + seconds;
+                                    document.getElementById('currentHourExtern').textContent = hours + ':' + minutes;
+                                }
+                                
+                                setInterval(updateTime, 1000);
+                                updateTime();
+                                
+                                // Luister naar berichten van het hoofdvenster
+                                window.addEventListener('message', function(event) {
+                                    if (event.data.type === 'updateStatus') {
+                                        const statusElem = document.getElementById('popupStatusExtern');
+                                        statusElem.textContent = event.data.message;
+                                        statusElem.className = 'popup-status ' + event.data.statusClass;
+                                    }
+                                });
+                            <\/script>
+                        </body>
+                        </html>
+                    `);
+                    
+                    // Stuur status updates naar de popup
+                    window.setInterval(() => {
+                        if (popup && !popup.closed) {
+                            popup.postMessage({
+                                type: 'updateStatus',
+                                message: statusMessageElement.textContent,
+                                statusClass: statusMessageElement.classList.contains('status-connected') ? 'status-connected' : 
+                                           statusMessageElement.classList.contains('status-found') ? 'status-found' :
+                                           statusMessageElement.classList.contains('status-notfound') ? 'status-notfound' : 'status-connecting'
+                            }, '*');
+                        }
+                    }, 1000);
+                    
+                    return;
+                }
+            }
+            
+            // Als popup geblokkeerd is, gebruik inline popup
+            popupBlocked = true;
+            popupOverlay.classList.remove('hidden');
+            updatePopup();
+        }
+        
+        // Update popup inhoud
+        function updatePopup() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            
+            popupTimeElement.textContent = `${hours}:${minutes}`;
+            updatePopupStatus(statusMessageElement.textContent, 
+                statusMessageElement.classList.contains('status-connected') ? 'connected' :
+                statusMessageElement.classList.contains('status-found') ? 'found' :
+                statusMessageElement.classList.contains('status-notfound') ? 'notfound' : 'connecting');
+        }
+        
+        // Update popup status
+        function updatePopupStatus(message, status) {
+            popupStatusElement.textContent = message;
+            popupStatusElement.className = 'popup-status';
+            
+            if (status === 'connecting') {
+                popupStatusElement.classList.add('status-connecting');
+            } else if (status === 'found') {
+                popupStatusElement.classList.add('status-found');
+            } else if (status === 'notfound') {
+                popupStatusElement.classList.add('status-notfound');
+            } else if (status === 'connected') {
+                popupStatusElement.classList.add('status-connected');
+            }
+        }
+        
+        // Sluit de popup
+        function closePopup() {
+            popupOverlay.classList.add('hidden');
+            radioStarted = false;
+            stopAudio();
+        }
+        
+        // Update status message
+        function updateStatusMessage(message, status) {
+            statusMessageElement.textContent = message;
+            statusMessageElement.className = 'status-message';
+            
+            if (status === 'connecting') {
+                statusMessageElement.classList.add('status-connecting');
+            } else if (status === 'found') {
+                statusMessageElement.classList.add('status-found');
+            } else if (status === 'notfound') {
+                statusMessageElement.classList.add('status-notfound');
+            } else if (status === 'connected') {
+                statusMessageElement.classList.add('status-connected');
+            }
+        }
+        
+        // Update countdown display
+        function updateCountdown() {
+            if (!nextPlayTime) return;
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentSecond = now.getSeconds();
+            
+            const [nextHour, nextMinute] = nextPlayTime.split('.').map(Number);
+            
+            // Bereken seconden tot volgende afspeeltijd
+            let secondsUntilNext = (nextHour - currentHour) * 3600 + (nextMinute - currentMinute) * 60 - currentSecond;
+            
+            // Als de tijd al gepasseerd is vandaag, bereken voor morgen
+            if (secondsUntilNext <= 0) {
+                secondsUntilNext += 24 * 3600; // Voeg een dag toe
+            }
+            
+            // Toon alleen countdown als we binnen 2 minuten zijn
+            if (secondsUntilNext <= 120) {
+                const minutes = Math.floor(secondsUntilNext / 60);
+                const seconds = secondsUntilNext % 60;
+                countdownElement.textContent = `Volgende radio over: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                const next = findNextPlayTime();
+                if (next.today) {
+                    countdownElement.textContent = `Volgende radio om ${next.tijd.replace('.', ':')}`;
+                } else {
+                    countdownElement.textContent = `Volgende radio morgen om ${next.tijd.replace('.', ':')}`;
+                }
+            }
+        }
+        
+        // Verander volume
+        function changeVolume() {
+            audio.volume = volumeSlider.value;
+        }
+        
+        // Update status
+        function updateStatus() {
+            // Status wordt nu automatisch bijgewerkt door andere functies
+        }
+        
+        // Start de radio wanneer de pagina geladen is
+        window.addEventListener('DOMContentLoaded', init);
+        
+        // Voor demo/test doeleinden: versnel de tijd
+        function enableDemoMode() {
+            console.log("Demo modus ingeschakeld");
+            
+            let demoMinutes = 5; // Start op 05:55
+            let demoHours = 5;
+            let demoSeconds = 55;
+            
+            // Overschrijf de updateCurrentTime functie voor demo
+            const originalUpdateCurrentTime = updateCurrentTime;
+            
+            updateCurrentTime = function() {
+                demoSeconds += 1;
+                
+                if (demoSeconds >= 60) {
+                    demoSeconds = 0;
+                    demoMinutes += 1;
+                    
+                    if (demoMinutes >= 60) {
+                        demoMinutes = 0;
+                        demoHours += 1;
+                        
+                        if (demoHours >= 24) {
+                            demoHours = 0;
+                        }
+                    }
+                }
+                
+                const hours = demoHours.toString().padStart(2, '0');
+                const minutes = demoMinutes.toString().padStart(2, '0');
+                const seconds = demoSeconds.toString().padStart(2, '0');
+                currentTimeElement.textContent = `${hours}:${minutes}:${seconds}`;
+                
+                if (popupTimeElement) {
+                    popupTimeElement.textContent = `${hours}:${minutes}:${seconds}`;
+                }
+                
+                // Controleer elke seconde of we moeten voorladen/afspelen
+                checkPreloadAndPlay();
+            };
+            
+            // Update elke seconde
+            setInterval(updateCurrentTime, 1000);
+            updateCurrentTime();
+            
+            // Voeg demo knop toe
+            const demoBtn = document.createElement('button');
+            demoBtn.textContent = "Demo: +1 minuut";
+            demoBtn.style.backgroundColor = "#ff9800";
+            demoBtn.style.marginTop = "10px";
+            demoBtn.style.padding = "10px 20px";
+            demoBtn.style.borderRadius = "50px";
+            demoBtn.style.border = "none";
+            demoBtn.style.color = "#000";
+            demoBtn.style.fontWeight = "bold";
+            demoBtn.style.cursor = "pointer";
+            demoBtn.onclick = function() {
+                demoMinutes += 1;
+                if (demoMinutes >= 60) {
+                    demoMinutes = 0;
+                    demoHours += 1;
+                    if (demoHours >= 24) demoHours = 0;
+                }
+                updateCurrentTime();
+                updateNextPlayTime();
+            };
+            
+            document.querySelector('.container').appendChild(demoBtn);
+        }
+        
+        // Schakel demo modus in voor testen (uitcommentariëren voor productie)
+        // enableDemoMode();
+    </script>
 </body>
 </html>
