@@ -3,12 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Songs radio</title>
+    <title>Online Radio - Automatische Uitzending</title>
     <style>
+        :root {
+            /* Light mode default colors */
+            --bg-gradient-start: #f0f2f5;
+            --bg-gradient-end: #e4e7eb;
+            --container-bg: rgba(255, 255, 255, 0.9);
+            --text-color: #333333;
+            --primary-color: #1a73e8;
+            --primary-hover: #0d62d9;
+            --secondary-color: #5f6368;
+            --accent-color: #1a73e8;
+            --accent-light: rgba(26, 115, 232, 0.1);
+            --border-color: #dadce0;
+            --card-bg: rgba(248, 249, 250, 0.9);
+            --status-ready: #34a853;
+            --status-playing: #ea4335;
+            --status-waiting: #1a73e8;
+            --upcoming-bg: rgba(26, 115, 232, 0.08);
+            --loading-bg: rgba(52, 168, 83, 0.08);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* Dark mode colors */
+                --bg-gradient-start: #0d1117;
+                --bg-gradient-end: #161b22;
+                --container-bg: rgba(22, 27, 34, 0.9);
+                --text-color: #e6edf3;
+                --primary-color: #58a6ff;
+                --primary-hover: #79b8ff;
+                --secondary-color: #8b949e;
+                --accent-color: #58a6ff;
+                --accent-light: rgba(88, 166, 255, 0.1);
+                --border-color: #30363d;
+                --card-bg: rgba(13, 17, 23, 0.9);
+                --status-ready: #2ea043;
+                --status-playing: #f85149;
+                --status-waiting: #58a6ff;
+                --upcoming-bg: rgba(88, 166, 255, 0.1);
+                --loading-bg: rgba(46, 160, 67, 0.1);
+                --shadow-color: rgba(0, 0, 0, 0.3);
+            }
+        }
+        
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-color);
             margin: 0;
             padding: 20px;
             min-height: 100vh;
@@ -20,37 +68,53 @@
         .container {
             max-width: 600px;
             width: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
+            background: var(--container-bg);
+            border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px var(--shadow-color);
+            border: 1px solid var(--border-color);
         }
         
         header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px solid #4cc9f0;
+            border-bottom: 2px solid var(--primary-color);
             padding-bottom: 20px;
         }
         
         h1 {
-            color: #4cc9f0;
+            color: var(--primary-color);
             margin: 0;
             font-size: 2.2em;
+            font-weight: 600;
         }
         
         .subtitle {
-            color: #b8b8b8;
+            color: var(--secondary-color);
             font-size: 1em;
             margin-top: 10px;
+            font-weight: 400;
+        }
+        
+        .theme-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85em;
+            color: var(--secondary-color);
         }
         
         .radio-status {
-            background: rgba(30, 30, 46, 0.9);
-            border-radius: 10px;
+            background: var(--card-bg);
+            border-radius: 16px;
             padding: 25px;
             margin-bottom: 25px;
             text-align: center;
+            border: 1px solid var(--border-color);
         }
         
         .status-indicator {
@@ -60,25 +124,26 @@
             gap: 15px;
             margin-bottom: 20px;
             padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
         }
         
         .status-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #4cc9f0;
+            background: var(--status-waiting);
             animation: pulse 2s infinite;
         }
         
         .status-dot.ready {
-            background: #2ecc71;
+            background: var(--status-ready);
             animation: none;
         }
         
         .status-dot.playing {
-            background: #e74c3c;
+            background: var(--status-playing);
             animation: pulse 1s infinite;
         }
         
@@ -89,43 +154,46 @@
         }
         
         .current-track {
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--card-bg);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            border-left: 4px solid #4cc9f0;
+            border-left: 4px solid var(--primary-color);
+            border: 1px solid var(--border-color);
         }
         
         .track-title {
             font-size: 1.4em;
-            color: #fff;
+            color: var(--text-color);
             margin: 0 0 10px 0;
+            font-weight: 600;
         }
         
         .track-time {
-            color: #4cc9f0;
+            color: var(--primary-color);
             font-size: 1.1em;
             margin: 0;
+            font-weight: 500;
         }
         
         .start-button {
-            background: #4cc9f0;
+            background: var(--primary-color);
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 18px 40px;
             font-size: 1.2em;
-            color: #1a1a2e;
+            color: white;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-weight: bold;
+            font-weight: 600;
             width: 100%;
             margin-bottom: 25px;
         }
         
         .start-button:hover {
-            background: #2db2d9;
+            background: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 201, 240, 0.3);
+            box-shadow: 0 5px 15px rgba(26, 115, 232, 0.3);
         }
         
         .start-button:active {
@@ -133,23 +201,26 @@
         }
         
         .start-button:disabled {
-            background: #666;
+            background: var(--secondary-color);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+            opacity: 0.7;
         }
         
         .schedule {
-            background: rgba(30, 30, 46, 0.9);
-            border-radius: 10px;
+            background: var(--card-bg);
+            border-radius: 16px;
             padding: 25px;
+            border: 1px solid var(--border-color);
         }
         
         .schedule-title {
-            color: #4cc9f0;
+            color: var(--primary-color);
             margin-top: 0;
             margin-bottom: 20px;
             font-size: 1.3em;
+            font-weight: 600;
         }
         
         .schedule-list {
@@ -161,88 +232,121 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 15px;
-            margin: 8px 0;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 6px;
+            padding: 14px 16px;
+            margin: 10px 0;
+            background: var(--container-bg);
+            border-radius: 10px;
             transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+        
+        .schedule-item:hover {
+            transform: translateX(4px);
+            border-color: var(--primary-color);
         }
         
         .schedule-item.current-playing {
-            background: rgba(231, 76, 60, 0.2);
-            border-left: 4px solid #e74c3c;
+            background: rgba(234, 67, 53, 0.1);
+            border-left: 4px solid var(--status-playing);
         }
         
         .schedule-item.next-up {
-            background: rgba(76, 201, 240, 0.2);
-            border-left: 4px solid #4cc9f0;
+            background: var(--accent-light);
+            border-left: 4px solid var(--accent-color);
         }
         
         .schedule-item.preloading {
-            background: rgba(46, 204, 113, 0.1);
-            border-left: 4px solid #2ecc71;
+            background: var(--loading-bg);
+            border-left: 4px solid var(--status-ready);
         }
         
         .schedule-time {
-            font-weight: bold;
+            font-weight: 600;
             font-size: 1.2em;
-            color: #4cc9f0;
+            color: var(--primary-color);
             min-width: 60px;
         }
         
         .schedule-track {
-            color: #fff;
+            color: var(--text-color);
             flex-grow: 1;
             margin-left: 20px;
+            font-weight: 500;
         }
         
         .schedule-status {
-            color: #4cc9f0;
+            color: var(--primary-color);
             font-size: 0.9em;
             min-width: 100px;
             text-align: right;
+            font-weight: 500;
         }
         
         .loading-info {
-            background: rgba(46, 204, 113, 0.1);
-            border: 1px solid #2ecc71;
-            border-radius: 6px;
-            padding: 12px 15px;
+            background: var(--loading-bg);
+            border: 1px solid var(--status-ready);
+            border-radius: 10px;
+            padding: 14px 16px;
             margin-top: 15px;
-            color: #2ecc71;
+            color: var(--status-ready);
             text-align: center;
+            font-weight: 500;
         }
         
         footer {
             text-align: center;
             margin-top: 25px;
-            color: #888;
+            color: var(--secondary-color);
             font-size: 0.9em;
         }
         
         .time-display {
             font-size: 1.1em;
-            color: #4cc9f0;
+            color: var(--primary-color);
             margin-top: 15px;
             text-align: center;
+            font-weight: 500;
         }
         
         .upcoming-info {
-            background: rgba(76, 201, 240, 0.1);
-            border: 1px solid #4cc9f0;
-            border-radius: 6px;
-            padding: 12px 15px;
+            background: var(--upcoming-bg);
+            border: 1px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 14px 16px;
             margin-top: 15px;
-            color: #4cc9f0;
+            color: var(--primary-color);
             text-align: center;
+            font-weight: 500;
+        }
+        
+        /* Dark mode specific adjustments */
+        @media (prefers-color-scheme: dark) {
+            .start-button:hover {
+                box-shadow: 0 5px 15px rgba(88, 166, 255, 0.3);
+            }
+            
+            .schedule-item.current-playing {
+                background: rgba(248, 81, 73, 0.1);
+            }
+        }
+        
+        /* Light mode specific adjustments */
+        @media (prefers-color-scheme: light) {
+            .schedule-item.current-playing {
+                background: rgba(234, 67, 53, 0.08);
+            }
         }
     </style>
 </head>
 <body>
+    <div class="theme-indicator" id="themeIndicator">
+        Thema: <span id="themeText">Systeem</span>
+    </div>
+    
     <div class="container">
         <header>
-            <h1>📻 AI Songs radio</h1>
-            <div class="subtitle">Luister gratis online!</div>
+            <h1>📻 Online Radio</h1>
+            <div class="subtitle">Automatische uitzending - Precies op tijd</div>
         </header>
         
         <div class="radio-status">
@@ -276,12 +380,12 @@
             </ul>
             
             <div class="loading-info" id="loadingInfo" style="display: none;">
-                Volgende uitzending komt eraan...
+                Bestand wordt geladen voor volgende uitzending...
             </div>
         </div>
         
         <footer>
-            Online luisteren naar de AI Songs Radio
+            Online Radio - Bestanden worden 30 seconden van tevoren geladen
         </footer>
     </div>
 
@@ -316,9 +420,24 @@
                 this.setupEventListeners();
                 this.updateScheduleDisplay();
                 this.updateTimeDisplay();
+                this.detectTheme();
                 
                 // Update tijd elke seconde
                 setInterval(() => this.updateTimeDisplay(), 1000);
+                
+                // Luister naar thema veranderingen
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    this.detectTheme();
+                });
+            }
+            
+            detectTheme() {
+                const themeIndicator = document.getElementById('themeText');
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    themeIndicator.textContent = 'Donker';
+                } else {
+                    themeIndicator.textContent = 'Licht';
+                }
             }
             
             setupEventListeners() {
